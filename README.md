@@ -45,53 +45,156 @@ Artifacto is an automated pipeline that transforms ephemeral AI agent conversati
    # Edit .env
    ```
 
+## Configuration
+
+### Environment Variables (`.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `LLM_PROVIDER` | No | LLM backend: `claude_code` (default), `anthropic_api`, or `ollama` |
+| `ANTHROPIC_API_KEY` | Conditional | API key for Anthropic direct calls. Required when using `anthropic_api` provider |
+| `OLLAMA_MODEL` | No | Ollama model name (e.g., `llama3`). Used for local inference fallback |
+| `GITHUB_REPO` | No | GitHub repository in `owner/repo` format |
+| `SITE_BASE_URL` | No | Base URL for the published site (e.g., `https://padeler.github.io/artifacto`) |
+
+### LLM Provider Selection
+
+Set `LLM_PROVIDER` in your `.env` file:
+
+- **`claude_code`** (default): Tries Anthropic API first, then Ollama as fallback. If both are unavailable, produces a basic heuristic draft from the raw input.
+- **`anthropic_api`**: Calls Anthropic API directly using the `anthropic` Python SDK. Requires `ANTHROPIC_API_KEY`. Install with `pip install -e ".[anthropic]"`.
+- **`ollama`**: Uses local Ollama inference. Set `OLLAMA_MODEL` to specify the model name.
+
 ## Usage
 
 ### Ingesting Content
+
 ```bash
 # From a file
 artifacto ingest --file ./my-notes.md
 
-# From a URL
+# From a URL (scrapes and extracts content)
 artifacto ingest --url "https://chat-log-link.com/123"
 
-# From standard input
+# From raw text
+artifacto ingest --text "Fix for the Docker networking issue: ..."
+
+# Pipe clipboard/stdin content
 cat snippet.txt | artifacto ingest --pipe
+
+# Attach images along with text input
+artifacto ingest --file ./notes.md --images ./screenshot.png ./diagram.svg
 ```
 
+When images are attached, Artifacto converts them to WebP format and saves them in the per-post image directory. The markdown body is updated with the final image paths.
+
 ### Reviewing Drafts
+
 ```bash
 # List all pending drafts
 artifacto review
 
-# View a specific draft
+# View a specific draft (full content)
 artifacto review my-post-slug
 ```
 
+Drafts are saved to `drafts/`. You can manually edit them before approving.
+
 ### Publishing & Managing
+
 ```bash
-# Approve a draft (commits and pushes to GitHub)
+# Approve a draft (moves to blog/, commits and pushes)
 artifacto approve my-post-slug
 
-# Reject a draft (deletes it)
+# Reject a draft (deletes draft + associated images)
 artifacto reject my-post-slug
 
 # List published posts
 artifacto list
 
-# Delete a published post
+# List posts filtered by tag
+artifacto list --tag nodejs
+
+# Delete a published post (removes file + images, commits and pushes)
 artifacto delete my-post-slug
+
+# Show all existing tags (from posts and drafts)
+artifacto tags
 ```
+
+### Content Schema (Front-Matter)
+
+Each blog post uses the following YAML front-matter:
+
+```yaml
+---
+title: "Post Title"
+pubDate: "2026-06-30"
+tags: ["tag1", "tag2"]
+summary: "One-sentence description."
+heroImage: "/images/slug/hero.webp"  # optional
+draft: false
+suggestedImages:  # optional — search terms for Wikimedia Commons
+  - "relevant-topic-image"
+---
+```
+
+Tags are flat, lowercase, and hyphenated. The date field is `pubDate` (not `date`).
 
 ## Local Development
 
 To run the Astro site locally:
+
 ```bash
 cd site
 npm run dev
 ```
 
 To run the Python tests:
+
 ```bash
 pytest
 ```
+
+## LLM Prompt Tuning
+
+The refinement prompt lives in `backend/refinement/prompt.py`. The system prompt instructs the LLM to:
+
+- Act as an elite technical writer
+- Extract clear **Problem Statement**, **Actionable Solution**, and **Root Cause**
+- Structure output strictly as Markdown with front-matter
+- Reuse existing tags from the project's tag index; create new tags sparingly
+- Suggest image search terms (populated as `suggestedImages` in front-matter)
+
+To adjust the blog's "voice" or tone, modify the system prompt string in `backend/refinement/prompt.py` or the provider-specific system messages in `backend/refinement/providers.py`.
+
+## Image Pipeline
+
+When images are provided via `--images` or suggested by the LLM:
+
+1. **Validation**: File paths are checked for existence and readability.
+2. **Conversion**: Images are converted to WebP format with quality=85 compression.
+3. **Resizing**: Images wider than 1920px are resized proportionally.
+4. **Storage**: Saved to `site/public/images/<post-slug>/`.
+5. **Markdown Update**: The draft's markdown body is updated with the final WebP paths before saving.
+
+For LLM-suggested images, the pipeline searches Wikimedia Commons for relevant freely licensed images matching each suggested search term.
+
+## GitHub Actions Deployment
+
+Pushing to `main` triggers:
+1. Astro site build (`npm run build`)
+2. Pagefind search index generation (`npx pagefind --site dist`)
+3. Artifact upload and deployment to GitHub Pages
+
+## Contribution Guidelines
+
+1. **Code Style**: Follow PEP 8 for Python, match existing conventions for Astro/TypeScript.
+2. **Testing**: Add tests for new functionality under `tests/`. Run `pytest` before submitting changes.
+3. **Front-Matter Schema**: Do not change the front-matter fields without updating both the backend parser (`backend/refinement/providers.py`) and the Astro content schema (`site/src/content.config.ts`).
+4. **Logging**: All operations should log to `logs/artifacto.log` with `[ISO-TIMESTAMP] [LEVEL] [MODULE]` format.
+5. **Error Handling**: Fail explicitly with clear error messages. Do not add silent fallbacks that mask failures.
+
+## License
+
+MIT

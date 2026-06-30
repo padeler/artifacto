@@ -31,13 +31,17 @@ jobs:
         working-directory: ./site
 
       - name: Build Astro site
-        uses: withastro/action@v3
-        with:
-          path: ./site
+        run: npm run build
+        working-directory: ./site
 
       - name: Build Pagefind search index
         run: npx pagefind --site dist
         working-directory: ./site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site/dist
 
   deploy:
     needs: build

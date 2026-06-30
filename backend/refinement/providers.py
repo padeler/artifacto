@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from typing import Protocol
 from pathlib import Path
 import logging
+
+import yaml
+
 from backend.config import Config
 
 logger = logging.getLogger(__name__)
@@ -20,62 +23,98 @@ class LLMProvider(Protocol):
     def refine(self, raw_text: str, existing_tags: list[str], images: list[Path]) -> RefinedPost:
         ...
 
+def _validate_frontmatter(data: dict) -> None:
+    """Validate that front-matter contains required fields."""
+    if "title" not in data or not isinstance(data["title"], str):
+        raise ValueError("Front-matter missing or invalid 'title' field (must be string)")
+    if "tags" in data and not isinstance(data["tags"], list):
+        raise ValueError("Front-matter 'tags' field must be a list")
+    if "suggestedImages" in data and not isinstance(data["suggestedImages"], list):
+        raise ValueError("Front-matter 'suggestedImages' field must be a list")
+
+
 def parse_llm_output(markdown_content: str) -> RefinedPost:
-    """Parses the LLM markdown output to extract front-matter fields and body."""
-    # Simple front-matter parsing
+    """Parses the LLM markdown output to extract front-matter fields and body.
+
+    Uses PyYAML for robust front-matter parsing with validation. Falls back
+    to heuristic extraction if YAML parsing fails or no front-matter is present.
+    """
     title = "Untitled Post"
     summary = ""
-    tags = []
-    
-    front_matter_match = re.search(r"^---\s*\n(.*?)\n---\s*\n(.*)", markdown_content, re.DOTALL)
-    if front_matter_match:
-        front_matter = front_matter_match.group(1)
-        markdown_body = front_matter_match.group(2)
-        
-        # Extract title
-        title_match = re.search(r"^title:\s*['\"]?(.*?)['\"]?$", front_matter, re.MULTILINE)
-        if title_match:
-            title = title_match.group(1).strip()
-            
-        # Extract summary
-        summary_match = re.search(r"^summary:\s*['\"]?(.*?)['\"]?$", front_matter, re.MULTILINE)
-        if summary_match:
-            summary = summary_match.group(1).strip()
-            
-        # Extract tags
-        tags_match = re.search(r"^tags:\s*\[(.*?)\]", front_matter, re.MULTILINE)
-        if tags_match:
-            tags_str = tags_match.group(1)
-            tags = [t.strip().strip("'").strip('"') for t in tags_str.split(",") if t.strip()]
+    tags: list[str] = []
+    suggested_images: list[str] = []
+    markdown_body = ""
 
-        # Extract suggestedImages (search terms for image sourcing)
-        suggested_images = []
-        images_match = re.search(r"^suggestedImages:\s*\[(.*?)\]", front_matter, re.MULTILINE)
-        if images_match:
-            images_str = images_match.group(1)
-            suggested_images = [
-                i.strip().strip("'").strip('"')
-                for i in images_str.split(",")
-                if i.strip()
-            ]
+    # Extract front-matter block between --- delimiters
+    front_matter_match = re.search(
+        r"^---\s*\n(.*?)\n---\s*\n(.*)", markdown_content, re.DOTALL
+    )
+    if not front_matter_match:
+        logger.warning("No front-matter delimiters (---) found. Using heuristic draft mode.")
+        markdown_body = markdown_content
+        # Try to extract a title from the first heading
+        heading_match = re.search(r"^##+\s+(.+)", markdown_content, re.MULTILINE)
+        if heading_match:
+            title = heading_match.group(1).strip()[:120]
 
     else:
-        logger.warning("Failed to parse front-matter from LLM output. Using raw output.")
-        markdown_body = markdown_content
-        suggested_images = []
+        front_matter_text = front_matter_match.group(1)
+        markdown_body = front_matter_match.group(2)
+
+        try:
+            fm_data = yaml.safe_load(front_matter_text)
+            if not isinstance(fm_data, dict):
+                raise ValueError("Front-matter did not parse as a YAML mapping (dict)")
+            _validate_frontmatter(fm_data)
+
+            title = fm_data.get("title", "Untitled Post")
+            summary = fm_data.get("summary", "")
+            tags = [str(t).strip().lower() for t in fm_data.get("tags", [])]
+            suggested_images = [
+                str(i).strip() for i in fm_data.get("suggestedImages", [])
+            ]
+
+        except (yaml.YAMLError, ValueError) as e:
+            logger.warning(f"YAML front-matter validation/parsing failed ({e}). Using regex fallback.")
+            # Regex fallback for individual fields
+            title_match = re.search(
+                r"^title:\s*['\"]?(.*?)['\"]?$", front_matter_text, re.MULTILINE
+            )
+            if title_match:
+                title = title_match.group(1).strip()
+
+            summary_match = re.search(
+                r"^summary:\s*['\"]?(.*?)['\"]?$", front_matter_text, re.MULTILINE
+            )
+            if summary_match:
+                summary = summary_match.group(1).strip()
+
+            tags_match = re.search(r"^tags:\s*\[(.*?)\]", front_matter_text, re.MULTILINE)
+            if tags_match:
+                tags_str = tags_match.group(1)
+                tags = [t.strip().strip("'").strip('"') for t in tags_str.split(",") if t.strip()]
+
+            images_match = re.search(
+                r"^suggestedImages:\s*\[(.*?)\]", front_matter_text, re.MULTILINE
+            )
+            if images_match:
+                images_str = images_match.group(1)
+                suggested_images = [
+                    i.strip().strip("'").strip('"')
+                    for i in images_str.split(",")
+                    if i.strip()
+                ]
 
     # Generate slug from title
-    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-    if not slug:
-        slug = "draft-post"
-        
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-') or "draft-post"
+
     return RefinedPost(
         title=title,
         slug=slug,
         tags=tags,
         summary=summary,
         markdown_body=markdown_content.strip(),
-        suggested_images=suggested_images
+        suggested_images=suggested_images,
     )
 
 class AnthropicAPIProvider:

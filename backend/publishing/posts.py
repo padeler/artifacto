@@ -1,3 +1,4 @@
+import re
 import shutil
 from pathlib import Path
 import logging
@@ -6,11 +7,36 @@ from backend.publishing.git import commit_and_push
 
 logger = logging.getLogger(__name__)
 
-def get_posts() -> list[Path]:
-    """List all published posts."""
+POSTS_RE = r"^---\s*\n(.*?)\n---\s*\n(.*)"
+
+def get_posts(tag: str | None = None) -> list[Path]:
+    """List all published posts, optionally filtered by tag."""
     if not Config.POSTS_DIR.exists():
         return []
-    return sorted(list(Config.POSTS_DIR.glob("*.md")))
+    posts = sorted(list(Config.POSTS_DIR.glob("*.md")))
+    if tag is None:
+        return posts
+
+    # Filter by tag — scan front-matter for the requested tag
+    tags_pattern = re.compile(r"^tags:\s*\[(.*?)\]", re.MULTILINE)
+    filtered: list[Path] = []
+    for filepath in posts:
+        try:
+            content = filepath.read_text(encoding="utf-8")
+            match = tags_pattern.search(content)
+            if not match:
+                continue
+            tags_str = match.group(1)
+            extracted = [
+                t.strip().strip("'").strip('"')
+                for t in tags_str.split(",")
+                if t.strip()
+            ]
+            if tag in extracted:
+                filtered.append(filepath)
+        except Exception as e:
+            logger.warning(f"Failed to scan post tags {filepath}: {e}")
+    return filtered
 
 def delete_post(slug: str) -> None:
     """Delete a published post and its associated images, then commit and push."""

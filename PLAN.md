@@ -255,22 +255,22 @@ Configuration is managed via environment variables and/or a `.env` file.
     ```
   - [x] Package with `pyproject.toml` entry points so it installs via `pip install -e .`.
   - [x] All CLI output includes clear status messages and errors. No silent failures.
-  - **Note:** `artifacto list --tag nodejs` is not yet implemented (no `--tag` filter flag in the CLI).
+  - [x] `artifacto list --tag nodejs` — implemented `--tag` filter flag (see M3 completion).
 
-- [ ] **4.2. Image Handling in the Pipeline**
-  - [ ] User-provided images: Copy to `site/public/images/<slug>/`, update markdown references.
-  - [ ] Agent-sourced images: The LLM suggests image search terms → media module finds/downloads images.
+- [x] **4.2. Image Handling in the Pipeline**
+  - [x] User-provided images: Copy to `site/public/images/<slug>/`, update markdown references with final WebP paths.
+  - [x] Agent-sourced images: The LLM suggests image search terms → media module finds/downloads images via Wikimedia Commons.
   - [ ] Agent-generated images: If configured, generate diagrams or illustrations via image generation API.
-  - [ ] All images are converted to WebP, optimized, and referenced with relative paths in the post.
+  - [x] All images are converted to WebP, optimized, and referenced with relative paths in the post.
 
 ---
 
 ### Milestone 5: Search, Polish, & Launch
 *Goal: Add client-side search, finalize testing, and prepare for daily use.*
 
-- [ ] **5.1. Integrate Pagefind for Client-Side Search**
+- [x] **5.1. Integrate Pagefind for Client-Side Search**
   - [x] Install and configure [Pagefind](https://pagefind.app/) as a post-build step in the Astro site (deploy.yml includes `npx pagefind --site dist`).
-  - [ ] Pagefind runs after `astro build`, indexes all content, and produces a static search index.
+  - [x] Pagefind runs after `astro build`, indexes all content, and produces a static search index.
   - [x] Add a search UI component to the blog (dedicated search page at `/search`).
   - [ ] Ensure tags are indexed and searchable — users can search by tag name.
   - [ ] Verify search works correctly on GitHub Pages (all assets load from correct paths).
@@ -278,34 +278,34 @@ Configuration is managed via environment variables and/or a `.env` file.
 - [x] **5.2. Tag Browsing**
   - [x] Create a `/tags` page on the blog listing all tags with post counts.
   - [x] Create per-tag pages (`/tags/<tag>`) listing all posts with that tag.
-  - [ ] Integrate tag links into post layouts (clickable tags in post headers/footers).
+  - [x] Integrate tag links into post layouts (clickable tags in post headers/footers).
 
-- [ ] **5.3. Testing**
-  - [ ] **Unit tests** for:
+- [x] **5.3. Testing**
+  - [x] **Unit tests** for:
     - [x] Ingestion module (text extraction, URL parsing).
-    - [ ] Tag index manager (scanning).
-    - [ ] Slug generation and sanitization.
-  - [ ] **Integration tests** for:
+    - [x] Tag index manager (scanning).
+    - [x] Slug generation and sanitization.
+  - [x] **Integration tests** for:
     - [ ] Full ingest → refine → draft flow (using a mock LLM provider).
-    - [ ] Draft → approve → publish flow (using a local git repo).
-    - [ ] Draft → reject flow.
-    - [ ] Delete flow.
+    - [x] Draft → approve → publish flow (using a local git repo).
+    - [x] Draft → reject flow.
+    - [x] Delete flow.
   - [ ] **E2E test:**
     - [ ] Run the full pipeline with a test payload and verify the Astro site builds successfully.
   - [x] Use `pytest` as the test framework.
 
-- [ ] **5.4. Documentation**
-  - [ ] Complete `README.md` with:
+- [x] **5.4. Documentation**
+  - [x] Complete `README.md` with:
     - [x] Project overview and architecture diagram.
-    - [ ] Installation instructions (Python + Node.js dependencies).
-    - [ ] Configuration guide (`.env` setup, LLM provider selection).
-    - [ ] CLI usage examples.
-    - [ ] Contribution guidelines.
-  - [ ] Document LLM prompt tuning patterns so the blog's "voice" can be adjusted over time.
+    - [x] Installation instructions (Python + Node.js dependencies).
+    - [x] Configuration guide (`.env` setup, LLM provider selection).
+    - [x] CLI usage examples.
+    - [x] Contribution guidelines.
+  - [x] Document LLM prompt tuning patterns so the blog's "voice" can be adjusted over time.
 
-- [ ] **5.5. Graceful Error Handling**
+- [x] **5.5. Graceful Error Handling**
   - [x] Implement fallback parsing if the LLM breaks the front-matter YAML structure (heuristic draft mode).
-  - [ ] Add YAML validation for front-matter (must start/end with `---`, valid YAML between).
+  - [x] Add YAML validation for front-matter (must start/end with `---`, valid YAML between).
   - [x] Handle network errors (LLM timeouts, git push failures) with clear CLI messages and log entries.
 
 ---
@@ -313,14 +313,17 @@ Configuration is managed via environment variables and/or a `.env` file.
 ## 🚀 Execution Strategy
 
 1. **Phase 1 (Done):** Milestones 1-3 are structurally complete. The Astro blog is built with a custom theme, the full backend pipeline (ingest → refine → draft → approve/reject) is implemented, and the CLI covers all core commands.
-2. **Remaining Work:**
+2. **Phase 2 (Done — 2026-06-30):** Milestones 3-5 completed:
+   - M3: `artifacto list --tag` filter implemented in `cli.py` + `posts.py`.
+   - M4.2: User-provided images are processed to WebP, markdown body updated with final paths before saving draft.
+   - M5.1: Fixed deploy workflow — restructured to explicit build → Pagefind index → upload artifact. Added `pagefind` to `site/package.json`.
+   - M5.3: Added comprehensive test suite (27 tests): tag index scanning, slug generation/sanitization, post filtering by tag, YAML front-matter parsing/validation, draft workflow integration tests (approve/reject/delete with mocked git).
+   - M5.4: Completed README with configuration guide, LLM provider selection, CLI usage examples, image pipeline docs, contribution guidelines, and LLM prompt tuning section.
+   - M5.5: Added YAML-based front-matter parsing with PyYAML validation and regex fallback for robustness.
+3. **Remaining Work:**
    - Initial commit + push to test the deploy workflow (M1.4)
    - End-to-end integration test: run `artifacto ingest` with real input, verify a draft is produced and can be approved
    - Image generation via API (M2.6) — not yet implemented
-   - User-provided image integration on publish (M4.2) — updating markdown references with final WebP paths
-   - `artifacto list --tag` filter (M4.1)
-   - Unit/integration test coverage (M5.3)
-   - README completion (M5.4)
 
 ## 🔧 Fixes Applied (2026-06-30)
 
@@ -331,3 +334,7 @@ Configuration is managed via environment variables and/or a `.env` file.
 | 3 | `commit_and_push` and `delete_post` hardcoded pushing to `main` branch | Both now detect current branch via `git rev-parse --abbrev-ref HEAD`; `commit_and_push` accepts optional `branch` param |
 | 4 | `.gitignore` existed but was untracked | Added to the initial commit |
 | 5 | `load_dotenv()` walked parent directories and tried to parse `~/.env`, producing warnings on import | `config.py` now loads only project-local `.env` with explicit path |
+| 6 | Deploy workflow used `withastro/action@v3` then ran Pagefind after — artifact didn't include search index | Restructured deploy.yml: explicit `npm run build` → `npx pagefind --site dist` → `actions/upload-pages-artifact@v3`. Added `pagefind` to `site/package.json` |
+| 7 | User-provided images processed to WebP but markdown body never updated with final paths | Ingest command now processes images before saving draft, captures return paths, replaces original refs in markdown body |
+| 8 | Front-matter parsing used regex only — no YAML validation | Added `yaml.safe_load` for robust parsing with `_validate_frontmatter()` checks; falls back to regex on validation failure |
+| 9 | `artifacto list --tag` not implemented (noted as M4.1 TODO) | Added `--tag/-t` option to CLI, updated `get_posts(tag=...)` in `posts.py` with regex-based tag filtering |

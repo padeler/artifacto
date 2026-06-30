@@ -61,18 +61,43 @@ def ingest(
         raise typer.Exit(1)
         
     typer.echo(f"Refinement complete. Title: {post.title} (Slug: {post.slug})")
-    
-    # Save draft
-    draft_path = save_draft(post)
-    
-    # Process images if any
+
+    # Process user-provided images BEFORE saving draft, so we can update markdown refs
+    dest_dir = Config.IMAGES_DIR / post.slug
+    image_replacements: dict[str, str] = {}  # original path stem → relative WebP path
     if valid_images:
-        dest_dir = Config.IMAGES_DIR / post.slug
+        dest_dir.mkdir(parents=True, exist_ok=True)
         for img_path in valid_images:
             try:
-                process_image(img_path, dest_dir)
+                webp_path = process_image(img_path, dest_dir)
+                relative_path = f"/images/{post.slug}/{webp_path.name}"
+                # Store both absolute path and stem-based replacements
+                image_replacements[str(img_path)] = relative_path
+                image_replacements[img_path.name] = relative_path
+                image_replacements[img_path.stem] = webp_path.stem
+                logger.info(f"Image {img_path} → {relative_path}")
             except Exception as e:
                 typer.echo(f"Failed to process image {img_path}: {e}", err=True)
+
+    # Update markdown body with final WebP paths before saving draft
+    if image_replacements:
+        updated_body = post.markdown_body
+        for original_ref, replacement_ref in image_replacements.items():
+            updated_body = updated_body.replace(original_ref, replacement_ref)
+        # Rebuild RefinedPost with updated body (no-op import for type hint)
+        from backend.refinement.providers import RefinedPost as RP
+        post = RP(
+            title=post.title,
+            slug=post.slug,
+            tags=post.tags,
+            summary=post.summary,
+            markdown_body=updated_body,
+            suggested_images=post.suggested_images,
+        )
+        logger.info("Updated markdown body with processed image paths.")
+
+    # Save draft (with updated image references)
+    draft_path = save_draft(post)
 
     typer.echo(f"\nDraft saved to: {draft_path}")
 
@@ -133,13 +158,15 @@ def reject(slug: str):
         raise typer.Exit(1)
 
 @app.command("list")
-def list_posts():
-    """List all published posts."""
-    posts = get_posts()
+def list_posts(
+    tag: str = typer.Option(None, "--tag", "-t", help="Filter posts by tag"),
+):
+    """List all published posts, optionally filtered by tag."""
+    posts = get_posts(tag=tag)
     if not posts:
         typer.echo("No published posts found.")
         return
-    typer.echo("Published Posts:")
+    typer.echo(f"Published Posts{' — tag: ' + tag if tag else ''}:" )
     for p in posts:
         typer.echo(f"  - {p.stem}")
 
