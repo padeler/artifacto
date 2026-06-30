@@ -1,0 +1,76 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Search — ${SITE_TITLE}`} description="Search across all Artifacto posts." />
+		<link href={`${import.meta.env.BASE_URL}pagefind/pagefind-ui.css`} rel="stylesheet" />
+		<style>
+			.page-heading {
+				margin-bottom: 2rem;
+			}
+			.page-heading h1 {
+				font-size: 2rem;
+				margin-bottom: 0.25rem;
+			}
+			#search {
+				margin-top: 2rem;
+				--pagefind-ui-primary: var(--accent);
+				--pagefind-ui-text: var(--text-primary);
+				--pagefind-ui-background: var(--bg-card);
+				--pagefind-ui-border: var(--border-subtle);
+				--pagefind-ui-tag: var(--bg-elevated);
+				--pagefind-ui-border-width: 1px;
+				--pagefind-ui-border-radius: var(--radius-md);
+				--pagefind-ui-image-border-radius: var(--radius-sm);
+				--pagefind-ui-image-box-ratio: 16 / 9;
+				--pagefind-ui-font: var(--font-inter), system-ui, sans-serif;
+			}
+			/* Overrides for pagefind UI dark theme */
+			#search .pagefind-ui__search-input {
+				background-color: var(--bg-elevated);
+				color: var(--text-primary);
+				border-color: var(--border-subtle);
+			}
+			#search .pagefind-ui__result {
+				border-color: var(--border-subtle);
+			}
+			#search .pagefind-ui__result-link {
+				color: var(--accent-light);
+			}
+			#search .pagefind-ui__result-excerpt {
+				color: var(--text-secondary);
+			}
+			#search .pagefind-ui__message {
+				color: var(--text-muted);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="page-heading">
+				<h1>Search</h1>
+			</div>
+			
+			<div id="search"></div>
+			
+			<script is:inline define:vars={{ baseUrl: import.meta.env.BASE_URL }}>
+				window.addEventListener('DOMContentLoaded', (event) => {
+					new PagefindUI({ 
+						element: "#search", 
+						showSubResults: true,
+						baseUrl: baseUrl
+					});
+				});
+			</script>
+			<script is:inline src={`${import.meta.env.BASE_URL}pagefind/pagefind-ui.js`}></script>
+		</main>
+		<Footer />
+	</body>
+</html>

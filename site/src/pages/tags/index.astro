@@ -1,0 +1,88 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+// Calculate tag counts
+const tagCounts: Record<string, int> = {};
+posts.forEach((post) => {
+	post.data.tags.forEach((tag) => {
+		tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+	});
+});
+
+const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Tags — ${SITE_TITLE}`} description="Browse posts by tag." />
+		<style>
+			.page-heading {
+				margin-bottom: 2.5rem;
+			}
+			.page-heading h1 {
+				font-size: 2rem;
+				margin-bottom: 0.5rem;
+			}
+			.tags-container {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1rem;
+			}
+			.tag-card {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.75rem 1.25rem;
+				background: var(--bg-card);
+				border: 1px solid var(--border-subtle);
+				border-radius: var(--radius-md);
+				text-decoration: none;
+				transition: all var(--transition-fast);
+			}
+			.tag-card:hover {
+				background: var(--bg-card-hover);
+				border-color: var(--accent);
+				transform: translateY(-2px);
+				box-shadow: var(--shadow-glow);
+			}
+			.tag-name {
+				color: var(--text-primary);
+				font-weight: 600;
+				font-size: 1.1rem;
+			}
+			.tag-count {
+				background: var(--bg-elevated);
+				color: var(--text-secondary);
+				padding: 0.1rem 0.5rem;
+				border-radius: 999px;
+				font-size: 0.8rem;
+				border: 1px solid var(--border-subtle);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="page-heading">
+				<h1>Tags</h1>
+				<p>Browse {sortedTags.length} tags across all posts.</p>
+			</div>
+			<div class="tags-container">
+				{sortedTags.map(([tag, count]) => (
+					<a href={`${import.meta.env.BASE_URL}tags/${tag}/`} class="tag-card">
+						<span class="tag-name">{tag}</span>
+						<span class="tag-count">{count}</span>
+					</a>
+				))}
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

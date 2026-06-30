@@ -1,0 +1,41 @@
+---
+const today = new Date();
+---
+
+<footer>
+	<div class="footer-content">
+		<p class="copyright">
+			&copy; {today.getFullYear()} Artifacto. Built with <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a>.
+		</p>
+		<p class="tagline">
+			Capturing engineering knowledge from AI-assisted development.
+		</p>
+	</div>
+</footer>
+<style>
+	footer {
+		padding: 3rem 1.5rem;
+		border-top: 1px solid var(--border-subtle);
+		text-align: center;
+	}
+	.footer-content {
+		max-width: 960px;
+		margin: 0 auto;
+	}
+	.copyright {
+		color: var(--text-muted);
+		font-size: 0.85rem;
+		margin-bottom: 0.25rem;
+	}
+	.copyright a {
+		color: var(--text-secondary);
+	}
+	.copyright a:hover {
+		color: var(--accent-light);
+	}
+	.tagline {
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+</style>

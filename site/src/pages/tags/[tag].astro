@@ -1,0 +1,113 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog', ({ data }) => !data.draft);
+	
+	const tags = new Set();
+	posts.forEach((post) => {
+		post.data.tags.forEach((tag) => tags.add(tag));
+	});
+
+	return Array.from(tags).map((tag) => {
+		const filteredPosts = posts
+			.filter((post) => post.data.tags.includes(tag))
+			.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+		return {
+			params: { tag },
+			props: { posts: filteredPosts },
+		};
+	});
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Posts tagged "${tag}" — ${SITE_TITLE}`} description={`All posts tagged with ${tag}`} />
+		<style>
+			.page-heading {
+				margin-bottom: 2rem;
+			}
+			.page-heading h1 {
+				font-size: 2rem;
+				margin-bottom: 0.25rem;
+			}
+			.page-heading h1 .tag-highlight {
+				color: var(--accent);
+			}
+			.posts-list {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+			.post-item {
+				display: block;
+				padding: 1.25rem 1.5rem;
+				background: var(--bg-card);
+				border: 1px solid var(--border-subtle);
+				border-radius: var(--radius-md);
+				text-decoration: none;
+				transition: all var(--transition-normal);
+			}
+			.post-item:hover {
+				background: var(--bg-card-hover);
+				border-color: var(--border-accent);
+				box-shadow: var(--shadow-glow);
+				transform: translateX(4px);
+			}
+			.post-item h3 {
+				font-size: 1.15rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin: 0 0 0.35rem;
+			}
+			.post-item .post-meta {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				flex-wrap: wrap;
+			}
+			.post-item .post-date {
+				font-size: 0.8rem;
+				color: var(--text-muted);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="page-heading">
+				<h1>Posts tagged <span class="tag-highlight">#{tag}</span></h1>
+				<p>{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+			</div>
+
+			<ul class="posts-list">
+				{posts.map((post) => (
+					<li>
+						<a class="post-item" href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+							<h3>{post.data.title}</h3>
+							<div class="post-meta">
+								<span class="post-date">
+									<FormattedDate date={post.data.pubDate} />
+								</span>
+							</div>
+						</a>
+					</li>
+				))}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>

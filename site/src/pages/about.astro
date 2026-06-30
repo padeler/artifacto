@@ -1,0 +1,83 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={`About — ${SITE_TITLE}`} description="What is Artifacto?" />
+		<style>
+			.about-content {
+				max-width: 660px;
+				margin: 0 auto;
+			}
+			.about-content h1 {
+				background: var(--accent-gradient);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+				margin-bottom: 1rem;
+			}
+			.about-content p {
+				color: var(--text-secondary);
+				line-height: 1.8;
+			}
+			.about-content a {
+				color: var(--accent-light);
+			}
+			.feature-list {
+				list-style: none;
+				padding: 0;
+				margin: 1.5rem 0;
+			}
+			.feature-list li {
+				padding: 0.5em 0;
+				color: var(--text-secondary);
+				display: flex;
+				align-items: baseline;
+				gap: 0.5em;
+			}
+			.feature-list li::before {
+				content: "◆";
+				color: var(--accent);
+				font-size: 0.7em;
+				flex-shrink: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="about-content">
+				<h1>About Artifacto</h1>
+				<p>
+					Artifacto is an automated pipeline that transforms ephemeral AI agent conversations —
+					bug fixes, architectural workarounds, novel solutions — into a permanent, structured,
+					public knowledge base.
+				</p>
+				<p>
+					Every time you solve a tricky problem during an AI-assisted coding session, the
+					solution typically lives only in that conversation. Artifacto captures these solutions
+					and publishes them as searchable, well-structured blog posts.
+				</p>
+
+				<h2>How It Works</h2>
+				<ul class="feature-list">
+					<li>Feed in raw text, a markdown file, or a shared chat URL</li>
+					<li>An LLM refines the content into a structured technical post</li>
+					<li>Review and approve the draft before it goes live</li>
+					<li>Published automatically via GitHub Pages</li>
+				</ul>
+
+				<p>
+					Built with <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a>,
+					Python, and powered by AI. Source code on
+					<a href="https://github.com/padeler/artifacto" target="_blank" rel="noopener">GitHub</a>.
+				</p>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
