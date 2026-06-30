@@ -1,10 +1,23 @@
+---
+name: ingest
+description: Transform a URL, file path, or pasted text into a structured blog post draft for the Artifacto knowledge base. Use when the user wants to turn raw content (an article, a chat log, notes) into a blog post.
+argument-hint: [url-or-file-path]
+---
+
 # ingest
 
 Transform raw input (URL, file path, or pasted text) into a structured blog post draft for the Artifacto knowledge base.
 
 ## Trigger
 
-The user provides content to be turned into a blog post — via URL, file path, raw text, or stdin paste. 
+The user provides content to be turned into a blog post — via URL, file path, raw text, or stdin paste.
+
+## Arguments
+
+`$ARGUMENTS` (optional): a URL or a file path to ingest.
+
+- If `$ARGUMENTS` is set, treat it as the input source — detect whether it's a URL or a file path (see Step 1) and ingest it directly without asking the user.
+- If `$ARGUMENTS` is empty, fall back to whatever content the user pasted or referenced in their message (URL, file path, raw text, or stdin paste).
 
 ## Steps
 
