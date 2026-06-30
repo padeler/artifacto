@@ -212,11 +212,6 @@ Configuration is managed via environment variables and/or a `.env` file.
     - [x] Push to trigger redeployment.
   - [x] `artifacto list` — list all published posts with their slugs, titles, dates, and tags.
 
-- [ ] **3.4. Deduplication**
-  - [ ] Before saving a draft, compute a content fingerprint (e.g., hash of the source input text).
-  - [x] Check against existing posts and drafts by slug. Warn the user if a similar post already exists.
-  - [ ] Allow the user to force-proceed if desired.
-
 - [x] **3.5. Logging**
   - [x] All operations (ingest, refine, approve, reject, delete) are logged to `logs/artifacto.log`.
   - [x] Log format: `[ISO-TIMESTAMP] [LEVEL] [ACTION] message`.
@@ -288,9 +283,8 @@ Configuration is managed via environment variables and/or a `.env` file.
 - [ ] **5.3. Testing**
   - [ ] **Unit tests** for:
     - [x] Ingestion module (text extraction, URL parsing).
-    - [ ] Tag index manager (scanning, deduplication).
+    - [ ] Tag index manager (scanning).
     - [ ] Slug generation and sanitization.
-    - [ ] Content fingerprinting / deduplication logic.
   - [ ] **Integration tests** for:
     - [ ] Full ingest → refine → draft flow (using a mock LLM provider).
     - [ ] Draft → approve → publish flow (using a local git repo).
@@ -322,7 +316,6 @@ Configuration is managed via environment variables and/or a `.env` file.
 2. **Remaining Work:**
    - Initial commit + push to test the deploy workflow (M1.4)
    - End-to-end integration test: run `artifacto ingest` with real input, verify a draft is produced and can be approved
-   - Content fingerprinting deduplication (M3.4) — currently only checks slug collision
    - Image generation via API (M2.6) — not yet implemented
    - User-provided image integration on publish (M4.2) — updating markdown references with final WebP paths
    - `artifacto list --tag` filter (M4.1)

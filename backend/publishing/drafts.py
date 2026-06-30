@@ -10,15 +10,7 @@ logger = logging.getLogger(__name__)
 def save_draft(post: RefinedPost) -> Path:
     """Save a refined post as a draft."""
     draft_path = Config.DRAFTS_DIR / f"{post.slug}.md"
-    
-    # Simple deduplication warning based on slug
-    if draft_path.exists():
-        logger.warning(f"Draft with slug '{post.slug}' already exists. Overwriting.")
-    
-    post_path = Config.POSTS_DIR / f"{post.slug}.md"
-    if post_path.exists():
-        logger.warning(f"Published post with slug '{post.slug}' already exists!")
-    
+
     draft_path.write_text(post.markdown_body, encoding="utf-8")
     logger.info(f"Saved draft to {draft_path}")
     return draft_path
