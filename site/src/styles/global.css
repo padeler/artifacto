@@ -1,5 +1,5 @@
 /*
-  Artifacto — Dark, developer-centric blog theme
+  Artifacto — developer-centric blog theme (dark by default, light on demand)
 */
 
 /* ── Design Tokens ─────────────────────────────────── */
@@ -10,6 +10,7 @@
 	--bg-elevated: #1a1a26;
 	--bg-card: #16161f;
 	--bg-card-hover: #1e1e2a;
+	--bg-header: rgba(10, 10, 15, 0.85);
 
 	/* Accent */
 	--accent: #7c6aef;
@@ -34,6 +35,40 @@
 	--shadow-glow: 0 0 30px rgba(124, 106, 239, 0.08);
 	--transition-fast: 150ms ease;
 	--transition-normal: 250ms ease;
+}
+
+/* ── Light Theme Override ──────────────────────────── */
+:root[data-theme="light"] {
+	/* Surface */
+	--bg-primary: #f7f7fb;
+	--bg-secondary: #ffffff;
+	--bg-elevated: #eeeef4;
+	--bg-card: #ffffff;
+	--bg-card-hover: #f1eefc;
+	--bg-header: rgba(247, 247, 251, 0.85);
+
+	/* Accent (darkened for legible contrast on light surfaces) */
+	--accent: #6a57e6;
+	--accent-light: #5743d4;
+	--accent-glow: rgba(124, 106, 239, 0.1);
+
+	/* Text */
+	--text-primary: #1a1a26;
+	--text-secondary: #4c4870;
+	--text-muted: #6b6588;
+
+	/* Borders */
+	--border-subtle: rgba(0, 0, 0, 0.1);
+	--border-accent: rgba(124, 106, 239, 0.35);
+
+	/* Misc */
+	--shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.05);
+	--shadow-glow: 0 0 30px rgba(124, 106, 239, 0.12);
+}
+
+/* Smooth the swap between themes */
+body {
+	transition: background var(--transition-normal), color var(--transition-normal);
 }
 
 /* ── Reset & Base ──────────────────────────────────── */
@@ -180,7 +215,7 @@ th {
 }
 
 .tag:hover {
-	background: rgba(124, 106, 239, 0.25);
+	background: var(--accent);
 	color: #fff;
 	border-color: var(--accent);
 }
