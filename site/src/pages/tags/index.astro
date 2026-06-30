@@ -76,7 +76,7 @@ const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 			</div>
 			<div class="tags-container">
 				{sortedTags.map(([tag, count]) => (
-					<a href={`${import.meta.env.BASE_URL}tags/${tag}/`} class="tag-card">
+					<a href={`${import.meta.env.BASE_URL}/tags/${tag}/`} class="tag-card">
 						<span class="tag-name">{tag}</span>
 						<span class="tag-count">{count}</span>
 					</a>

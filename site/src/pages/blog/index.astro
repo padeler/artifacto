@@ -99,7 +99,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 				<ul class="posts-list">
 					{posts.map((post) => (
 						<li>
-							<a class="post-item" href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+							<a class="post-item" href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
 								<h3>{post.data.title}</h3>
 								<p class="post-summary">{post.data.summary}</p>
 								<div class="post-meta">

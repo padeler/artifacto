@@ -2,22 +2,15 @@
 
 ## What It Does
 
-Artifacto is an automated pipeline that transforms ephemeral AI agent conversations (bug fixes, workarounds, novel solutions) into a structured knowledge base hosted on GitHub Pages.
+Artifacto is a personal knowledge base: AI agent conversations (bug fixes, workarounds, novel solutions) refined into structured blog posts hosted on GitHub Pages.
 
-Pipeline: **Ingest → Refine (LLM) → Review (draft) → Publish (commit + push)**.
+Workflow: **Ingest (/ingest SKILL) → Draft (drafts/) → Review → Publish (commit + push)**.
 
 ## Architecture
 
-- **Python backend** (`backend/`): CLI entry point via `typer`, ingestion (scraping/text), LLM refinement, tag indexing, media module (Wikimedia Commons search + WebP conversion), git operations.
 - **Astro site** (`site/`): Static blog with dark theme, Pagefind search, tag browsing, RSS feed. Content lives in `site/src/content/blog/`.
-- **Drafts** (`drafts/`): Staging area for LLM-generated posts before approval.
-
-## Key Config
-
-- Python dependencies managed via `pyproject.toml` (editable install: `pip install -e .[dev]`).
-- Environment variables from project-local `.env` only — `backend/config.py` uses an explicit path to avoid loading parent-dir `.env` files.
-- LLM provider set via `LLM_PROVIDER` env var: `claude_code` (default), `anthropic_api`, or `ollama`.
-- `ClaudeCodeProvider` tries Anthropic API → Ollama as fallbacks, then produces a heuristic draft if both are unavailable.
+- **SKILL** (`.claude/skills/ingest.md`): Handles content ingestion, LLM refinement, tag scanning, draft lifecycle, git operations.
+- **Image script** (`scripts/process-images.py`): Wikimedia Commons search + WebP conversion via Pillow/httpx.
 
 ## Content Schema (Front-Matter)
 
@@ -32,29 +25,19 @@ draft: false
 ---
 ```
 
-Note: date field is `pubDate`, collection path is `src/content/blog/` (not `posts/`). This diverges from the original PLAN.md but is consistent across all code.
+Note: date field is `pubDate`, collection path is `src/content/blog/` (not `posts/`).
 
-## Commands
+## Image Script
 
-- `artifacto ingest --file|--url|--text|--pipe` — ingest content, produce draft
-- `artifacto review [slug]` — list or preview drafts
-- `artifacto approve <slug>` — move to blog/, commit, push current branch
-- `artifacto reject <slug>` — delete draft + images
-- `artifacto list` — show published posts
-- `artifacto delete <slug>` — remove published post
-- `artifacto tags` — show existing tags
+```bash
+python3 scripts/process-images.py <slug> "search term 1" "search term 2"
+```
+
+Searches Wikimedia Commons, downloads matching images as WebP to `site/public/images/<slug>/`. Requires `Pillow` and `httpx`.
 
 ## Git
 
-`commit_and_push` detects the current branch automatically (`git rev-parse --abbrev-ref HEAD`). No hardcoded branch names.
-
-## Tests
-
-```bash
-pytest
-```
-
-Run from project root. Uses `pytest` framework, tests live in `tests/`.
+When committing posts, detect the current branch via `git rev-parse --abbrev-ref HEAD`. No hardcoded branch names. Push after commit to trigger deploy.
 
 ## Deployment
 

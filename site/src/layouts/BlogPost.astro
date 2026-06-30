@@ -105,7 +105,7 @@ const { title, summary, pubDate, updatedDate, heroImage, tags } = Astro.props;
 						{tags && tags.length > 0 && (
 							<div class="post-tags">
 								{tags.map((tag: string) => (
-									<a href={`${import.meta.env.BASE_URL}tags/${tag}/`} class="tag">{tag}</a>
+									<a href={`${import.meta.env.BASE_URL}/tags/${tag}/`} class="tag">{tag}</a>
 								))}
 							</div>
 						)}
