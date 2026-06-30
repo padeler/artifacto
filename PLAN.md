@@ -174,13 +174,13 @@ Configuration is managed via environment variables and/or a `.env` file.
     - [x] `OllamaProvider` — local inference via Ollama REST API.
   - [x] `RefinedPost` dataclass containing: `title`, `slug`, `tags`, `summary`, `markdown_body`, `suggested_images`.
 
-- [ ] **2.6. Build Media Module**
-  - [ ] Implement `backend/media/`:
+- [x] **2.6. Build Media Module**
+  - [x] Implement `backend/media/`:
     - [x] **Image search:** Given a post topic, search for relevant Creative Commons / freely licensed images (via Wikimedia Commons API).
     - [ ] **Image generation:** Optionally generate images using an image generation API (if configured).
     - [x] **Image processing:** Download, resize, and convert images to WebP for performance.
-    - [ ] Save images to `site/public/images/<post-slug>/`.
-    - [ ] Return image paths for inclusion in the post markdown.
+    - [x] Save images to `site/public/images/<post-slug>/`.
+    - [x] Return image paths for inclusion in the post markdown.
 
 ---
 
@@ -189,7 +189,7 @@ Configuration is managed via environment variables and/or a `.env` file.
 
 - [x] **3.1. Implement Draft Workflow**
   - [x] After LLM refinement, save the generated post to `drafts/<slug>.md`.
-  - [ ] Save associated images to `site/public/images/<slug>/` (images are pre-staged).
+  - [x] Save associated images to `site/public/images/<slug>/` (images are pre-staged).
   - [x] Display the draft path and a preview summary in CLI output.
   - [x] Support the following review actions via CLI:
     - [x] `artifacto review` — list all pending drafts.
@@ -323,7 +323,8 @@ Configuration is managed via environment variables and/or a `.env` file.
    - Initial commit + push to test the deploy workflow (M1.4)
    - End-to-end integration test: run `artifacto ingest` with real input, verify a draft is produced and can be approved
    - Content fingerprinting deduplication (M3.4) — currently only checks slug collision
-   - Image pipeline end-to-end (M2.6, M4.2) — processing works, but integration with the LLM prompt + auto-copy on publish is incomplete
+   - Image generation via API (M2.6) — not yet implemented
+   - User-provided image integration on publish (M4.2) — updating markdown references with final WebP paths
    - `artifacto list --tag` filter (M4.1)
    - Unit/integration test coverage (M5.3)
    - README completion (M5.4)

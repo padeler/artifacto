@@ -8,7 +8,7 @@ Pipeline: **Ingest → Refine (LLM) → Review (draft) → Publish (commit + pus
 
 ## Architecture
 
-- **Python backend** (`backend/`): CLI entry point via `typer`, ingestion (scraping/text), LLM refinement, tag indexing, image processing, git operations.
+- **Python backend** (`backend/`): CLI entry point via `typer`, ingestion (scraping/text), LLM refinement, tag indexing, media module (Wikimedia Commons search + WebP conversion), git operations.
 - **Astro site** (`site/`): Static blog with dark theme, Pagefind search, tag browsing, RSS feed. Content lives in `site/src/content/blog/`.
 - **Drafts** (`drafts/`): Staging area for LLM-generated posts before approval.
 
