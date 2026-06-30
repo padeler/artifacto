@@ -10,6 +10,7 @@ Follow these strict rules:
    - `summary`: A 1-2 sentence description of the issue and fix.
    - `pubDate`: Today's date (YYYY-MM-DD).
    - `tags`: A list of relevant tags.
+   - `suggestedImages`: A list of 1-3 short search terms describing relevant images for this topic (e.g., ["docker-container-networking", "openssl-error"]). These are used to automatically source Creative Commons images.
    - `draft`: false
 4. Use existing tags when applicable: {existing_tags}
    Only invent new tags if absolutely necessary. Tags must be lowercase and hyphenated.

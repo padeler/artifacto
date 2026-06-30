@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 from pathlib import Path
 from PIL import Image
@@ -6,6 +7,62 @@ import urllib.parse
 from backend.config import Config
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_suggested_images(
+    suggested_terms: list[str],
+    slug: str,
+    limit: int = 1,
+) -> list[str]:
+    """
+    Given a list of search terms (from LLM-suggested front-matter),
+    search Wikimedia Commons, download the top result for each term,
+    process it to WebP, and save under site/public/images/<slug>/.
+
+    Returns a list of relative paths (e.g. ["/images/slug/term.webp"])
+    that can be included in the post markdown.
+    """
+    if not suggested_terms:
+        return []
+
+    dest_dir = Config.IMAGES_DIR / slug
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    downloaded_paths: list[str] = []
+
+    for term in suggested_terms:
+        term_clean = term.strip().lower().replace(" ", "-")
+        if not term_clean:
+            continue
+
+        try:
+            urls = asyncio.run(search_wikimedia_commons(term_clean, limit=limit))
+        except Exception as e:
+            logger.warning(f"Failed to search Wikimedia for term '{term}': {e}")
+            continue
+
+        if not urls:
+            logger.info(f"No Wikimedia results for term '{term_clean}'")
+            continue
+
+        # Download the first URL
+        tmp_path = dest_dir / f"{term_clean}.tmp"
+        try:
+            asyncio.run(download_image(urls[0], tmp_path))
+        except Exception as e:
+            logger.warning(f"Failed to download image for term '{term}': {e}")
+            continue
+
+        # Process into WebP
+        out_path = process_image(tmp_path, dest_dir, filename_prefix=term_clean)
+        tmp_path.unlink(missing_ok=True)
+
+        relative_path = f"/images/{slug}/{out_path.name}"
+        downloaded_paths.append(relative_path)
+        logger.info(f"Resolved image for term '{term}' -> {relative_path}")
+
+    return downloaded_paths
+
 
 def process_image(source_path: Path, dest_dir: Path, filename_prefix: str = "") -> Path:
     """

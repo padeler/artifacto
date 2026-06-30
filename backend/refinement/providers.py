@@ -47,10 +47,22 @@ def parse_llm_output(markdown_content: str) -> RefinedPost:
         if tags_match:
             tags_str = tags_match.group(1)
             tags = [t.strip().strip("'").strip('"') for t in tags_str.split(",") if t.strip()]
-            
+
+        # Extract suggestedImages (search terms for image sourcing)
+        suggested_images = []
+        images_match = re.search(r"^suggestedImages:\s*\[(.*?)\]", front_matter, re.MULTILINE)
+        if images_match:
+            images_str = images_match.group(1)
+            suggested_images = [
+                i.strip().strip("'").strip('"')
+                for i in images_str.split(",")
+                if i.strip()
+            ]
+
     else:
         logger.warning("Failed to parse front-matter from LLM output. Using raw output.")
         markdown_body = markdown_content
+        suggested_images = []
 
     # Generate slug from title
     slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
@@ -63,7 +75,7 @@ def parse_llm_output(markdown_content: str) -> RefinedPost:
         tags=tags,
         summary=summary,
         markdown_body=markdown_content.strip(),
-        suggested_images=[] # For now, placeholder
+        suggested_images=suggested_images
     )
 
 class AnthropicAPIProvider:

@@ -9,7 +9,7 @@ from backend.refinement.core import refine_content
 from backend.tags.index import get_existing_tags
 from backend.publishing.drafts import save_draft, get_drafts, get_draft, approve_draft, reject_draft
 from backend.publishing.posts import get_posts, delete_post
-from backend.media.core import process_image
+from backend.media.core import process_image, resolve_suggested_images
 
 import logging
 
@@ -75,7 +75,21 @@ def ingest(
                 typer.echo(f"Failed to process image {img_path}: {e}", err=True)
 
     typer.echo(f"\nDraft saved to: {draft_path}")
-    typer.echo(f"Review it and then run: artifacto approve {post.slug}")
+
+    # Resolve suggested images from LLM
+    if post.suggested_images:
+        typer.echo("Sourcing images via Wikimedia Commons...")
+        try:
+            image_paths = resolve_suggested_images(post.suggested_images, post.slug)
+            if image_paths:
+                typer.echo(f"Sourced images: {', '.join(image_paths)}")
+            else:
+                typer.echo("Could not source any matching images.")
+        except Exception as e:
+            logger.warning(f"Failed to resolve suggested images: {e}")
+            typer.echo(f"Warning: Failed to source images ({e})", err=True)
+
+    typer.echo(f"Review and approve with: artifacto approve {post.slug}")
 
 @app.command()
 def review(slug: str = typer.Argument(None, help="Slug of the draft to preview")):
