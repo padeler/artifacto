@@ -16,7 +16,7 @@ The user provides content to be turned into a blog post — via URL, file path, 
 
 ### 2. Scan Existing Tags
 
-Read existing posts from `site/src/content/blog/` and drafts from `drafts/` to collect all currently used tags. Extract the `tags:` array from each post's YAML front-matter. This gives you a tag vocabulary to reuse.
+Read existing posts from `site/src/content/blog/` and drafts from `drafts/` to collect all currently used tags. Extract the `tags:` array from each post's YAML front-matter — note tags may be written inline (`tags: ["a", "b"]`) or as a multi-line YAML block list, so parse the front-matter rather than relying on a single-line grep. This gives you a tag vocabulary to reuse.
 
 ### 3. Refine into a Blog Post
 
@@ -30,7 +30,8 @@ Act as an elite technical writer and software engineer with a sharp sense of hum
    - `pubDate`: Today's date in `YYYY-MM-DD` format (coerced to date by Astro).
    - `tags`: Relevant tags from the existing vocabulary. Only invent new tags if absolutely necessary. Lowercase, hyphenated.
    - `draft`: `false`
-4. If images were provided or should be included, set `heroImage` to the path.
+   - `updatedDate` (optional): `YYYY-MM-DD`, only when republishing a previously-published post.
+4. If images were provided or should be included, set `heroImage` to a path relative to the **published** post location (`site/src/content/blog/<slug>.md`) — e.g. `../../assets/<slug>/hero.webp`. `heroImage` is validated by Astro's `image()` helper, so it must point at a managed asset under `site/src/assets/`, **not** a `/public` URL. See [Image Handling](#image-handling).
 5. **Output ONLY** the raw markdown starting with `---`. No pleasantries, no wrapping in code fences unless that's standard markdown.
 6. The blog post should be short, precise and to the point. No one wants to read long pages when looking for a solution
 
@@ -67,34 +68,36 @@ cat drafts/<slug>.md
 
 ### Approve Draft
 
-1. Move the draft from `drafts/<slug>.md` to `site/src/content/blog/<slug>.md`.
-2. Stage and commit:
+1. **Check for a slug collision** with an already-published post. If `site/src/content/blog/<slug>.md` exists, stop and ask the user whether to overwrite or pick a new slug — never silently clobber a published post.
+2. Move the draft from `drafts/<slug>.md` to `site/src/content/blog/<slug>.md`.
+3. **Validate the build** before pushing — this catches front-matter schema errors (e.g. a broken `heroImage` path) locally instead of in CI:
    ```bash
-   git add site/src/content/blog/<slug>.md
+   cd site && npx astro check
+   ```
+4. Stage and commit (include images if the post has any):
+   ```bash
+   git add site/src/content/blog/<slug>.md site/src/assets/<slug>/
    git commit -m "feat: publish post <slug>"
    ```
-3. Push current branch:
+5. Push current branch:
    ```bash
    git push origin $(git rev-parse --abbrev-ref HEAD)
    ```
 
 ### Reject Draft
 
+Drafts in `drafts/` are not tracked in git (only `.gitkeep` is), so rejecting is just a local cleanup — no commit needed.
+
 1. Delete `drafts/<slug>.md`.
-2. If associated images exist in `site/public/images/<slug>/`, remove them too.
-3. Stage deletions and commit:
-   ```bash
-   git add drafts/ site/public/images/
-   git commit -m "chore: reject draft <slug>"
-   ```
+2. If associated images exist in `site/src/assets/<slug>/`, remove that directory too.
 
 ### Delete Published Post
 
 1. Remove `site/src/content/blog/<slug>.md`.
-2. Remove associated images in `site/public/images/<slug>/` if they exist.
+2. Remove associated images in `site/src/assets/<slug>/` if they exist.
 3. Stage, commit, push:
    ```bash
-   git add site/src/content/blog/ site/public/images/
+   git add site/src/content/blog/ site/src/assets/
    git commit -m "chore: delete post <slug>"
    git push origin $(git rev-parse --abbrev-ref HEAD)
    ```
@@ -107,7 +110,7 @@ If the user wants images sourced for a post, run the image processing script:
 python3 scripts/process-images.py <slug> "search term 1" "search term 2"
 ```
 
-This searches Wikimedia Commons, downloads matching images, converts to WebP, and saves under `site/public/images/<slug>/`. Include the returned paths in the post's front-matter as `heroImage` or inline markdown image links.
+This searches Wikimedia Commons, downloads matching images, converts to WebP, and saves them under `site/src/assets/<slug>/` (managed Astro assets, optimized at build time). The script prints paths relative to a published post (`../../assets/<slug>/<name>.webp`) — use those directly as `heroImage` in front-matter or in inline markdown image links. These paths are authored for the post's **published** location under `site/src/content/blog/`, so they only resolve once the draft is approved; that's expected, since `drafts/` is outside the content collection and isn't built.
 
 ## Content Schema
 
@@ -117,11 +120,12 @@ Each post uses this YAML front-matter:
 ---
 title: "Post Title"
 pubDate: "2026-06-30"
+updatedDate: "2026-07-01"          # optional, for republished posts
 tags: ["tag1", "tag2"]
 summary: "One-sentence description."
-heroImage: "/images/slug/hero.webp"  # optional
+heroImage: "../../assets/slug/hero.webp"  # optional; managed asset, relative to the post
 draft: false
 ---
 ```
 
-Tags are flat, lowercase, hyphenated. Date field is `pubDate`. Collection path is `src/content/blog/` (not `posts/`).
+Tags are flat, lowercase, hyphenated. Date field is `pubDate`. Collection path is `src/content/blog/` (not `posts/`). `heroImage` is validated by Astro's `image()` helper — it must reference a managed asset under `site/src/assets/`, never a `/public` URL.

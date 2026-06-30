@@ -22,14 +22,15 @@ The site's mood is **nerdy, funny, engineering, computer science**. When writing
 ---
 title: "Post Title"
 pubDate: "2026-06-30"
+updatedDate: "2026-07-01"          # optional, for republished posts
 tags: ["tag1", "tag2"]
 summary: "One-sentence description."
-heroImage: "/images/slug/hero.webp"  # optional
+heroImage: "../../assets/slug/hero.webp"  # optional; managed asset, relative to the post
 draft: false
 ---
 ```
 
-Note: date field is `pubDate`, collection path is `src/content/blog/` (not `posts/`).
+Note: date field is `pubDate`, collection path is `src/content/blog/` (not `posts/`). `heroImage` is validated by Astro's `image()` helper, so it must point at a managed asset under `site/src/assets/`, **not** a `/public` URL.
 
 ## Image Script
 
@@ -37,7 +38,7 @@ Note: date field is `pubDate`, collection path is `src/content/blog/` (not `post
 python3 scripts/process-images.py <slug> "search term 1" "search term 2"
 ```
 
-Searches Wikimedia Commons, downloads matching images as WebP to `site/public/images/<slug>/`. Requires `Pillow` and `httpx`.
+Searches Wikimedia Commons, downloads matching images as WebP to `site/src/assets/<slug>/` (managed Astro assets), and prints `heroImage`-ready paths relative to the published post (`../../assets/<slug>/<name>.webp`). Requires `Pillow` and `httpx`.
 
 ## Git
 

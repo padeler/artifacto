@@ -3,7 +3,8 @@
 Standalone image processing utility for Artifacto blog posts.
 
 Searches Wikimedia Commons for freely licensed images matching provided search terms,
-downloads them, converts to WebP, and saves under site/public/images/<slug>/\n\nUsage:
+downloads them, converts to WebP, and saves under site/src/assets/<slug>/ so they can be
+referenced from post front-matter via Astro's image() helper.\n\nUsage:
     python scripts/process-images.py <slug> "search term 1" "search term 2"
 
 Example:
@@ -22,20 +23,22 @@ logger = logging.getLogger(__name__)
 
 # Base directory is the project root (parent of scripts/)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-IMAGES_DIR = PROJECT_ROOT / "site" / "public" / "images"
+# Images are managed Astro assets (optimized at build time via image()), not public files.
+ASSETS_DIR = PROJECT_ROOT / "site" / "src" / "assets"
 
 
 def resolve_suggested_images(slug: str, search_terms: list[str], limit: int = 1) -> list[str]:
     """
     For each search term: query Wikimedia Commons, download the top result,
-    convert to WebP, and save under site/public/images/<slug>/.
+    convert to WebP, and save under site/src/assets/<slug>/.
 
-    Returns a list of relative paths (e.g. ["/images/slug/term.webp"]).
+    Returns a list of front-matter paths relative to a published post at
+    site/src/content/blog/<slug>.md (e.g. ["../../assets/slug/term.webp"]).
     """
     if not search_terms:
         return []
 
-    dest_dir = IMAGES_DIR / slug
+    dest_dir = ASSETS_DIR / slug
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     downloaded_paths: list[str] = []
@@ -65,7 +68,7 @@ def resolve_suggested_images(slug: str, search_terms: list[str], limit: int = 1)
         out_path = process_image(tmp_path, dest_dir, filename_prefix=term_clean)
         tmp_path.unlink(missing_ok=True)
 
-        relative_path = f"/images/{slug}/{out_path.name}"
+        relative_path = f"../../assets/{slug}/{out_path.name}"
         downloaded_paths.append(relative_path)
         logger.info(f"Resolved image for term '{term}' -> {relative_path}")
 
