@@ -2,7 +2,7 @@
 title: "Extracting Clean Single-Word Audio from Piper TTS"
 summary: "Piper TTS struggles with isolated words—feed it context and slice the output to get perfect single-word audio."
 pubDate: "2026-06-30"
-tags: ["audio", "python"]
+tags: ["audio", "python", "piper", "greek", "tts", "voice"]
 draft: false
 ---
 
