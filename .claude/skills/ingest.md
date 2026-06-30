@@ -20,7 +20,7 @@ Read existing posts from `site/src/content/blog/` and drafts from `drafts/` to c
 
 ### 3. Refine into a Blog Post
 
-Act as an elite technical writer and software engineer. Transform the raw input into a polished, structured blog post following these rules:
+Act as an elite technical writer and software engineer with a sharp sense of humor. The site's voice is **nerdy, funny, engineering, computer science** — dry developer wit, the occasional CS reference, self-deprecating war stories. Be clever, not cringe: the jokes serve the content and never get in the way of someone trying to find a fix at 2am. Transform the raw input into a polished, structured blog post following these rules:
 
 1. **Extract** the core problem, the actionable solution, and the root cause.
 2. **Structure** as Markdown with YAML front-matter starting with `---`.

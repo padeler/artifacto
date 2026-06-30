@@ -1,6 +1,6 @@
 # Artifacto
 
-A personal knowledge base: AI agent conversations (bug fixes, workarounds, novel solutions) refined into structured blog posts, hosted on GitHub Pages.
+A personal knowledge base for hard-won engineering wisdom — the bug fixes, dirty hacks, and 2am breakthroughs from AI pair-programming sessions that would otherwise scroll into the void. Artifacto refines them into structured blog posts and hosts them on GitHub Pages, so future-you doesn't have to re-discover the same fix from scratch.
 
 ## How It Works
 

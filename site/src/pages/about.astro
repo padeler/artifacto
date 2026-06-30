@@ -7,7 +7,7 @@ import { SITE_TITLE } from '../consts';
 
 <html lang="en">
 	<head>
-		<BaseHead title={`About — ${SITE_TITLE}`} description="What is Artifacto?" />
+		<BaseHead title={`About — ${SITE_TITLE}`} description="What is Artifacto, and why does it exist?" />
 		<style>
 			.about-content {
 				max-width: 660px;
@@ -53,28 +53,31 @@ import { SITE_TITLE } from '../consts';
 			<div class="about-content">
 				<h1>About Artifacto</h1>
 				<p>
-					Artifacto is an automated pipeline that transforms ephemeral AI agent conversations —
-					bug fixes, architectural workarounds, novel solutions — into a permanent, structured,
-					public knowledge base.
+					You spend an hour spelunking through stack traces with an AI agent, finally land the
+					fix at 2am, feel briefly like a wizard — and then the chat scrolls away and the
+					knowledge evaporates. Artifacto is the cure for that very specific kind of grief: it
+					catches those ephemeral "aha" moments and fossilizes them into proper, searchable
+					blog posts.
 				</p>
 				<p>
-					Every time you solve a tricky problem during an AI-assisted coding session, the
-					solution typically lives only in that conversation. Artifacto captures these solutions
-					and publishes them as searchable, well-structured blog posts.
+					Think of it as a lab notebook for the bugs you've slain, the workarounds you're not
+					proud of, and the elegant solutions you absolutely are. Future-you will hit the same
+					wall again — and this time there'll be a post waiting instead of a 404 in your memory.
 				</p>
 
 				<h2>How It Works</h2>
 				<ul class="feature-list">
-					<li>Feed in raw text, a markdown file, or a shared chat URL</li>
-					<li>An LLM refines the content into a structured technical post</li>
-					<li>Review and approve the draft before it goes live</li>
-					<li>Published automatically via GitHub Pages</li>
+					<li>Throw in raw text, a markdown file, or a shared chat URL</li>
+					<li>An LLM does the tedious part: turning rambling logs into a structured post</li>
+					<li>You play editor — review, tweak, or veto before anything ships</li>
+					<li>Approved posts deploy themselves via GitHub Pages, no humans in the loop</li>
 				</ul>
 
 				<p>
-					Built with <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a>,
-					Python, and powered by AI. Source code on
-					<a href="https://github.com/padeler/artifacto" target="_blank" rel="noopener">GitHub</a>.
+					Held together with <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a>,
+					a bit of Python, and a healthy refusal to lose good ideas. Source code lives on
+					<a href="https://github.com/padeler/artifacto" target="_blank" rel="noopener">GitHub</a>,
+					bugs and all.
 				</p>
 			</div>
 		</main>

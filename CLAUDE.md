@@ -2,9 +2,13 @@
 
 ## What It Does
 
-Artifacto is a personal knowledge base: AI agent conversations (bug fixes, workarounds, novel solutions) refined into structured blog posts hosted on GitHub Pages.
+Artifacto is a personal knowledge base: AI agent conversations (bug fixes, workarounds, novel solutions) refined into structured blog posts hosted on GitHub Pages. The goal is to rescue good ideas before they scroll into the void of a closed chat tab.
 
 Workflow: **Ingest (/ingest SKILL) → Draft (drafts/) → Review → Publish (commit + push)**.
+
+## Voice & Tone
+
+The site's mood is **nerdy, funny, engineering, computer science**. When writing site copy, post intros, or summaries, lean into dry developer humor and CS references — self-deprecating debugging stories, playful asides — without sacrificing technical accuracy. Be clever, not cringe; the jokes serve the content, never bury it.
 
 ## Architecture
 
