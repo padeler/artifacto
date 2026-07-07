@@ -48,6 +48,22 @@ Act as an elite technical writer and software engineer with a sharp sense of hum
 5. **Output ONLY** the raw markdown starting with `---`. No pleasantries, no wrapping in code fences unless that's standard markdown.
 6. The blog post should be short, precise and to the point. No one wants to read long pages when looking for a solution
 
+### 3.5 Generate Hero Artwork (ComfyUI)
+
+If no images were provided in the source content and no `heroImage` was set, generate fitting artwork via ComfyUI MCP:
+
+1. **Build a prompt** from the post's title, summary, and tags. Prepend an artistic style descriptor matching the site's nerdy-engineering-voice. Keep the final prompt under 60 words.
+2. **Generate** via `generate_image` MCP tool:
+   ```
+   generate_image(prompt=<your_prompt>, width=1024, height=576)
+   ```
+   This returns immediately with a `prompt_id`.
+3. **Wait for completion** — poll `get_job_status(prompt_id=<id>)` until `done` is true (typical ~5-15 seconds).
+4. **Download** — call `get_history(prompt_id=<id>)` to obtain the output filename, then `get_image(filename=<name>, save_dir=<local dir>)` to save the PNG locally (works with the remote ComfyUI instance; no `COMFYUI_PATH` needed). Move it to `site/src/assets/<slug>/hero.png` — no format conversion needed, Astro's `image()` helper handles PNG.
+5. **Set `heroImage`** in front-matter to `../../assets/<slug>/hero.png`.
+
+If ComfyUI is unreachable or generation fails, log the error and skip — do not block draft creation on missing artwork.
+
 ### 4. Save as Draft
 
 Write the output to `drafts/<slug>.md`, where `<slug>` is generated from the title: lowercase, spaces → hyphens, non-alphanumeric removed, trailing hyphens stripped.
@@ -61,23 +77,12 @@ Show the user:
 - Draft path and file name
 - Title and summary from front-matter
 - Tags assigned
+- Hero image status: generated via ComfyUI, sourced from Wikimedia, or none
 - A note they can edit the draft before approving
 
 ## Operations
 
 After ingesting, the user may ask you to:
-
-### Review Drafts
-
-```bash
-# List all drafts with title, date, tags
-ls drafts/ && grep -h '^title:\|^pubDate:\|^tags:' drafts/*.md
-```
-
-Or show a specific draft:
-```bash
-cat drafts/<slug>.md
-```
 
 ### Approve Draft
 
@@ -104,18 +109,10 @@ Drafts in `drafts/` are not tracked in git (only `.gitkeep` is), so rejecting is
 1. Delete `drafts/<slug>.md`.
 2. If associated images exist in `site/src/assets/<slug>/`, remove that directory too.
 
-### Delete Published Post
-
-1. Remove `site/src/content/blog/<slug>.md`.
-2. Remove associated images in `site/src/assets/<slug>/` if they exist.
-3. Stage, commit, push:
-   ```bash
-   git add site/src/content/blog/ site/src/assets/
-   git commit -m "chore: delete post <slug>"
-   git push origin $(git rev-parse --abbrev-ref HEAD)
-   ```
 
 ## Image Handling
+
+### Wikimedia Commons (Primary)
 
 If the user wants images sourced for a post, run the image processing script:
 
@@ -124,6 +121,10 @@ python3 scripts/process-images.py <slug> "search term 1" "search term 2"
 ```
 
 This searches Wikimedia Commons, downloads matching images, converts to WebP, and saves them under `site/src/assets/<slug>/` (managed Astro assets, optimized at build time). The script prints paths relative to a published post (`../../assets/<slug>/<name>.webp`) — use those directly as `heroImage` in front-matter or in inline markdown image links. These paths are authored for the post's **published** location under `site/src/content/blog/`, so they only resolve once the draft is approved; that's expected, since `drafts/` is outside the content collection and isn't built.
+
+### ComfyUI Artwork Generation (Fallback)
+
+When no images were provided in the source content and Wikimedia search returns nothing (or wasn't attempted), Step 3.5 generates fitting artwork via ComfyUI MCP using the `generate_image` tool. The prompt is built from the post's title, summary, and tags with an artistic style descriptor matching the site's nerdy-engineering voice. The generated PNG is downloaded via the `get_history` + `get_image` MCP tools and saved as `site/src/assets/<slug>/hero.png` — no format conversion needed. Generation failure is non-blocking — if ComfyUI is unreachable or errors, log and skip.
 
 ## Content Schema
 
