@@ -3,6 +3,7 @@ title: 'Hello, Artifacto'
 summary: "The first post — a knowledge base for the bug fixes, hacks, and 2am breakthroughs that AI pair-programming sessions tend to swallow whole."
 pubDate: '2026-06-30'
 tags: ['artifacto', 'meta']
+heroImage: "../../assets/hello-artifacto/hero.png"
 draft: false
 ---
 

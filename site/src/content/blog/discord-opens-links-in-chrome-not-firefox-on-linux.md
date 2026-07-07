@@ -3,6 +3,7 @@ title: "Discord Opens Links in Chrome Instead of Firefox on Linux"
 summary: "Discord ignores your desktop's default-browser setting and reads xdg-mime directly; on Snap-installed Firefox the desktop file name trips it up, so set the MIME handlers explicitly and fully kill Discord."
 pubDate: "2026-06-30"
 tags: ["linux", "discord", "firefox", "xdg-mime"]
+heroImage: "../../assets/discord-opens-links-in-chrome-not-firefox-on-linux/hero.png"
 draft: false
 ---
 
