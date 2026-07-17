@@ -1,6 +1,6 @@
 # Artifacto
 
-A personal knowledge base for hard-won engineering wisdom — the bug fixes, dirty hacks, and 2am breakthroughs from AI pair-programming sessions that would otherwise scroll into the void. Artifacto refines them into structured blog posts and hosts them on GitHub Pages, so future-you doesn't have to re-discover the same fix from scratch.
+A personal knowledge base for tips tricks, bug fixes hacks and ideas from AI pair-programming sessions that would otherwise scroll into the void. Artifacto refines them into structured blog posts and hosts them on GitHub Pages, so future-you doesn't have to re-discover the same fix from scratch.
 
 ## How It Works
 

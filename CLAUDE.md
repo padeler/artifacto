@@ -8,7 +8,7 @@ Workflow: **Ingest (/ingest SKILL) → Draft (drafts/) → Review → Publish (c
 
 ## Voice & Tone
 
-The site's mood is **nerdy, funny, engineering, computer science**. When writing site copy, post intros, or summaries, lean into dry developer humor and CS references — self-deprecating debugging stories, playful asides — without sacrificing technical accuracy. Be clever, not cringe; the jokes serve the content, never bury it.
+The site's mood is **nerdy, funny, engineering, computer science**. When writing site copy, post intros, or summaries, lean into dry developer humor and CS references — self-deprecating debugging stories, playful asides — without sacrificing technical accuracy. Be clever, not cringe; the jokes serve the content, never bury it. Always keep it short and to the point.
 
 ## Architecture
 
