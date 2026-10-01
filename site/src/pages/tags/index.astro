@@ -8,7 +8,7 @@ import { SITE_TITLE } from '../../consts';
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 
 // Calculate tag counts
-const tagCounts: Record<string, int> = {};
+const tagCounts: Record<string, number> = {};
 posts.forEach((post) => {
 	post.data.tags.forEach((tag) => {
 		tagCounts[tag] = (tagCounts[tag] || 0) + 1;
